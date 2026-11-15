@@ -1,0 +1,72 @@
+# Mirage local stack.
+#   docker compose up -d                  -> postgres + redis
+#   docker compose --profile stubs up     -> also starts the placeholder app services
+# The app services are stubs until their parts land (see docs/PROGRESS.md).
+
+name: mirage
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-mirage}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      POSTGRES_DB: ${POSTGRES_DB:-mirage}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mirage} -d ${POSTGRES_DB:-mirage}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  # --- App service stubs (replaced in later parts) ---------------------------
+  honeypot: # Part 1-4: asyncssh server + shell engine
+    image: busybox:1.36
+    command: ["sh", "-c", "echo 'honeypot: stub, built in Parts 1-4'"]
+    profiles: ["stubs"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+  analyzer: # Part 5: session_end worker, ATT&CK mapping, reports
+    image: busybox:1.36
+    command: ["sh", "-c", "echo 'analyzer: stub, built in Part 5'"]
+    profiles: ["stubs"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+  api: # Part 6: FastAPI REST + WebSocket
+    image: busybox:1.36
+    command: ["sh", "-c", "echo 'api: stub, built in Part 6'"]
+    profiles: ["stubs"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+  web: # Part 7: React dashboard served by nginx
+    image: busybox:1.36
+    command: ["sh", "-c", "echo 'web: stub, built in Part 7'"]
+    profiles: ["stubs"]
+
+volumes:
+  pgdata:
+  redisdata:

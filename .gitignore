@@ -1,0 +1,39 @@
+# Secrets: never commit a real .env
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Node / frontend
+node_modules/
+web/dist/
+
+# Mirage runtime data (attacker data never goes in git)
+data/
+logs/
+*.jsonl
+*.cast
+quarantine/
+ssh_host_*_key
+ssh_host_*_key.pub
+*.mmdb
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+*.swp
